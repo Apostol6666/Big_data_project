@@ -19,6 +19,8 @@ from keras.callbacks import ModelCheckpoint
 import numpy as np
 import matplotlib.pyplot as plt
 
+#Достаем сонеты из вайла с сонетами
+#Помещаем в sonnets массив из соннетов, В виде sonnets[ 1sonnet, 2sonnet...]
 def get_sonnets(file):
     sonnet = '';
     sonnets = []
@@ -46,6 +48,7 @@ num_words = 10000
 sonnets = get_sonnets('sonnets.txt')
 right_sonnets = get_sonnets('sonnets2.txt')
 
+#Преобразуем все слова из сонетов в их числовое представление, используя Tokenizer
 tokenizer = Tokenizer(num_words=num_words)
 tokenizer.fit_on_texts(sonnets)
 tokenizer.word_index
@@ -54,6 +57,7 @@ vocabulary = sorted(list(set(tokenizer.word_index)))
 sequences = tokenizer.texts_to_sequences(sonnets)
 sequences_r = tokenizer.texts_to_sequences(right_sonnets)
 
+#Создаем горячие вектора X и Y, которые пойдут на вход LSTM
 sequences = pad_sequences(sequences, 100)
 sequences_r = pad_sequences(sequences_r, 100)
 
@@ -71,6 +75,7 @@ for i, sonnet in enumerate(sequences):
         X[i, t, word] = 1        
     Y[i, sequences_r[i]] = 1
 
+#Тестовая выборка, чтобы узнать, насколько хорошо обучена сеть
 train_data, x_test, train_label, y_test= train_test_split(X, Y, test_size=0.2, random_state=4)
 
 model = Sequential()
@@ -78,20 +83,24 @@ model.add(LSTM(101, input_shape =(101, len(tokenizer.word_index)+1)))
 model.add(Dense(len(tokenizer.word_index)+1))
 model.add(Activation('softmax'))
 
+#Запускаем сеть
 optimizer = RMSprop(lr = 0.01) 
 model.compile(optimizer=optimizer, 
               loss='binary_crossentropy', 
               metrics=['accuracy'])
 
+#Периодически сохраняем сеть
 model_save_path = 'best_model.h5'
 checkpoint_callback = ModelCheckpoint(model_save_path, 
                                       monitor='val_accuracy',
                                       save_best_only=True,
                                       verbose=1)
+#Сохраняем веса
 filepath = "weights.hdf5"
 
 checkpoint = ModelCheckpoint(filepath, monitor ='loss', verbose = 1, save_best_only = True, mode ='min') 
 
+#Запускаем модель
 history = model.fit(X, 
                     Y, 
                     epochs=1,
