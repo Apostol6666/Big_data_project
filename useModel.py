@@ -53,17 +53,16 @@ vocabulary = sorted(list(set(tokenizer.word_index)))
 num_word = dict((i, c) for i, c in enumerate(vocabulary))
 word_num = dict((c, i) for i, c in enumerate(vocabulary))
 
-def sample_index(preds, temperature = 1.0):
+def sample_index(preds, t = 1.0):
 
     preds = np.asarray(preds).astype('float64')
-    preds = np.log(preds) / temperature
+    preds = np.log(preds) / t
     exp_preds = np.exp(preds)
     preds = exp_preds / np.sum(exp_preds)
     probas = np.random.multinomial(1, preds, 1)
-
     return np.argmax(probas) 
 
-def generate_text(length, diversity, end_index):
+def gen_sonnet(length, diversity, end_index):
 
     start_index = random.randint(0, len(vocabulary) - max_length - 1)
     end_index += start_index
@@ -88,7 +87,7 @@ def generate_text(length, diversity, end_index):
 
 words_get = 101
 words_put = 101 - words_get
-result = generate_text(words_get, 0.2, words_put)
+result = gen_sonnet(words_get, 0.2, words_put)
 
 def get_result(put):
 
@@ -111,13 +110,12 @@ def get_result(put):
 
     form = ''
     form += form_result(start)
-    form += '/n/n'
+    form += '\n\n'
     form += form_result(end)
-
     return form
 
 print(get_result(words_put))
 file_result = 'result.txt'
 f = open(file_result,'w')
-f.write(get_result(words_get, words_put))
+f.write(get_result(words_put))
 f.close()
