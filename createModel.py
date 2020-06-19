@@ -1,5 +1,6 @@
 from keras.models import Sequential
-from keras.layers import Dense, Embedding, GRU, LSTM, Activation, Flatten 
+from keras.layers import Dense, Embedding, LSTM, Activation
+from sklearn.model_selection import train_test_split
 
 
 from keras.callbacks import LambdaCallback 
@@ -70,13 +71,15 @@ for i, sonnet in enumerate(sequences):
         X[i, t, word] = 1        
     Y[i, sequences_r[i]] = 1
 
-model = Sequential()
+train_data, x_test, train_label, y_test= train_test_split(X, Y, test_size=0.2, random_state=4)
 
+model = Sequential()
 model.add(LSTM(101, input_shape =(101, len(tokenizer.word_index)+1)))
 model.add(Dense(len(tokenizer.word_index)+1))
 model.add(Activation('softmax'))
 
-model.compile(optimizer='SGD', 
+optimizer = RMSprop(lr = 0.01) 
+model.compile(optimizer=optimizer, 
               loss='binary_crossentropy', 
               metrics=['accuracy'])
 
@@ -95,5 +98,10 @@ history = model.fit(X,
                     batch_size=221,
                     validation_split=0.1,
                     callbacks=[checkpoint_callback])
+
+
+result = model.evaluate(x_test, y_test, batch_size=128)
+print("test loss, test acc:", result)
+
 
 model.save("my_model.h5")
