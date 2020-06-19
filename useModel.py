@@ -21,7 +21,6 @@ def get_sonnets(file):
     for line in file_sonnet: 
         regex = re.compile('Sonnet\s+.+\s*')
         if(re.search( 'Sonnet', line)):
-            print(line)
             line=''
         lines.append(line)
 
@@ -33,32 +32,26 @@ def get_sonnets(file):
             sonnets.append(sonnet)
             sonnet = ''
     return sonnets
+
+def get_words(file):
+    with open(file, 'r') as file1:
+        text = file1.read() 
+    words = text.split()
+
+    for word in words:
+        word = word.strip(string.punctuation) 
+    return words
+
 sonnets = get_sonnets('sonnets.txt')
-
-with open('sonnets.txt', 'r') as file:
-    text = file.read() 
-
-words = text.split()
-for word in words:
-    word = word.strip(string.punctuation) 
-
-vocabulary = sorted(list(words)) 
+words = get_words('sonnets.txt')
 
 tokenizer = Tokenizer(num_words=num_words)
 tokenizer.fit_on_texts(sonnets)
 tokenizer.word_index
-vocabulary2 = sorted(list(set(tokenizer.word_index))) 
-print(len(vocabulary2))
-print(vocabulary2)
+vocabulary = sorted(list(set(tokenizer.word_index))) 
 
-indices_to_char = dict((i, c) for i, c in enumerate(vocabulary2))
-
-char_to_indices = dict((c, i) for i, c in enumerate(vocabulary2))
-print(char_to_indices)
-i=0
-while i!=5:
-    ch = indices_to_char[i]
-    i+=1
+num_word = dict((i, c) for i, c in enumerate(vocabulary))
+word_num = dict((c, i) for i, c in enumerate(vocabulary))
 
 def sample_index(preds, temperature = 1.0):
 
@@ -70,42 +63,61 @@ def sample_index(preds, temperature = 1.0):
 
     return np.argmax(probas) 
 
-def generate_text(length, diversity):
+def generate_text(length, diversity, end_index):
 
-    # Получить случайный начальный текст
-    start_index = random.randint(0, len(vocabulary2) - max_length - 1)
-    start_index1 = random.randint(0, len(sonnets))
-    generated = ''
-    end_index = start_index
-    sentence = ''
-    sen = words[start_index: start_index + 100] 
-    sentence = []
-    #while end_index!=start_index + max_length:
-    sentence.append(words[end_index])
-    generated += words[end_index]
-    generated += '  '
-    end_index +=1
+    start_index = random.randint(0, len(vocabulary) - max_length - 1)
+    end_index += start_index
+    sentence = [] 
+
+    while start_index != end_index:
+        sentence.append(words[start_index])
+        start_index +=1
 
     for i in range(length):
-            x_pred = np.zeros((1, max_length, len(vocabulary2)+1))
-            #print('sentence = ', sentence)
-            #print('sonnet =', sonnets[start_index1])
+            x_pred = np.zeros((1, max_length, len(vocabulary)+1))
             for t, word in enumerate(sentence):
-                #print(t,' ; ', ' ; ' ,word)
-                #c = str(sonnets[start_index1]
-                #print('word = ', word)
                 word = word.strip(string.punctuation) 
                 word = word.lower()
-                if word in char_to_indices:
-                    x_pred[0, t, char_to_indices[word]] = 1.0
+                if word in word_num:
+                    x_pred[0, t, word_num[word]] = 1.0
             preds = model.predict(x_pred, verbose = 0)[0]
             next_index = sample_index(preds, diversity)
-            next_char = indices_to_char[next_index]
-            #print('next_char  =  ', next_char, '  ||||   ')
-            generated += next_char
-            generated += '  ';
-            sentence.append(next_char)
-            #sentence = sentence[1:] + next_char
-    return generated
+            next_word = num_word[next_index]
+            sentence.append(next_word)
+    return sentence
 
-print(generate_text(101, 0.2))
+words_get = 101
+words_put = 101 - words_get
+result = generate_text(words_get, 0.2, words_put)
+
+def get_result(put):
+
+    start = result[0:put]
+    end = result[put:101]
+
+    def form_result(r): 
+        res = ''
+        l = 0
+        for line in r:
+            if l==0:
+                line.title()
+            res += line
+            res += ' '
+            l += 1
+            if l==6:
+                res += '\n'
+                l=0
+        return res
+
+    form = ''
+    form += form_result(start)
+    form += '/n/n'
+    form += form_result(end)
+
+    return form
+
+print(get_result(words_put))
+file_result = 'result.txt'
+f = open(file_result,'w')
+f.write(get_result(words_get, words_put))
+f.close()
