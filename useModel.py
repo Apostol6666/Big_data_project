@@ -108,7 +108,6 @@ def get_result(put):
 
     def form_result(r): 
         res = ''
-
         if r:
             for i in range (17):
                 r[i*6] = r[i*6].title()
