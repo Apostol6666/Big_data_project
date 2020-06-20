@@ -108,22 +108,23 @@ def get_result(put):
 
     def form_result(r): 
         res = ''
-        l = 0
-        for line in r:
-            if l==0:
-                line.title()
-            res += line
-            res += ' '
-            l += 1
-            if l==6:
+
+        if r:
+            for i in range (17):
+                r[i*6] = r[i*6].title()
+                line = r[i*6:i*6+6]
+                for word in line: 
+                    res += word
+                    res+= ' '
                 res += '\n'
-                l=0
         return res
 
     form = ''
-    form += form_result(start)
+    if start:
+        form += form_result(start)
     form += '\n\n'
-    form += form_result(end)
+    if end:
+        form += form_result(end)
     return form
 
 print(get_result(words_put))
