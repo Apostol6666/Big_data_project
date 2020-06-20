@@ -89,12 +89,6 @@ model.compile(optimizer=optimizer,
               loss='binary_crossentropy', 
               metrics=['accuracy'])
 
-#Периодически сохраняем сеть
-model_save_path = 'best_model.h5'
-checkpoint_callback = ModelCheckpoint(model_save_path, 
-                                      monitor='val_accuracy',
-                                      save_best_only=True,
-                                      verbose=1)
 #Сохраняем веса
 filepath = "weights.hdf5"
 
@@ -105,8 +99,7 @@ history = model.fit(X,
                     Y, 
                     epochs=1,
                     batch_size=221,
-                    validation_split=0.1,
-                    callbacks=[checkpoint_callback])
+                    validation_split=0.1)
 
 
 result = model.evaluate(x_test, y_test, batch_size=128)
