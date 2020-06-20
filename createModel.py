@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 
 #Достаем сонеты из вайла с сонетами
 #Помещаем в sonnets массив из соннетов, В виде sonnets[ 1sonnet, 2sonnet...]
-def get_sonnets(file):
+def get_sonnets():
     sonnet = '';
     sonnets = []
     lines = []
@@ -43,8 +43,8 @@ def get_sonnets(file):
 
 num_words = 10000
 
-sonnets = get_sonnets('sonnets.txt')
-right_sonnets = get_sonnets('sonnets2.txt')
+sonnets = get_sonnets()
+right_sonnets = get_sonnets()
 
 #Преобразуем все слова из сонетов в их числовое представление, используя Tokenizer
 tokenizer = Tokenizer(num_words=num_words)
