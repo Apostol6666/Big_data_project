@@ -14,8 +14,6 @@ from keras import utils
 from keras.preprocessing.sequence import pad_sequences
 from keras.preprocessing.text import Tokenizer
 
-from keras.callbacks import ModelCheckpoint
-
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -88,11 +86,6 @@ optimizer = RMSprop(lr = 0.01)
 model.compile(optimizer=optimizer, 
               loss='binary_crossentropy', 
               metrics=['accuracy'])
-
-#Сохраняем веса
-filepath = "weights.hdf5"
-
-checkpoint = ModelCheckpoint(filepath, monitor ='loss', verbose = 1, save_best_only = True, mode ='min') 
 
 #Запускаем модель
 history = model.fit(X, 
